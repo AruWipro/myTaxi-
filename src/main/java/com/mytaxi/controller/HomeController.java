@@ -11,7 +11,7 @@ public class HomeController
 
     @RequestMapping("/")
     public String home()
-    {
+    {   System.out.println("App i sup");
         return "redirect:swagger-ui.html";
     }
 
