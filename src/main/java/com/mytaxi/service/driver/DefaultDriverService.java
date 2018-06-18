@@ -1,16 +1,31 @@
 package com.mytaxi.service.driver;
 
+import java.util.List;
+
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.mytaxi.controller.mapper.CarMapper;
+import com.mytaxi.controller.mapper.DriverMapper;
 import com.mytaxi.dataaccessobject.DriverRepository;
+import com.mytaxi.datatransferobject.CarDTO;
+import com.mytaxi.datatransferobject.DriverDTO;
+import com.mytaxi.domainobject.CarDO;
+import com.mytaxi.domainobject.DriverCarLinkDO;
 import com.mytaxi.domainobject.DriverDO;
 import com.mytaxi.domainvalue.GeoCoordinate;
 import com.mytaxi.domainvalue.OnlineStatus;
+import com.mytaxi.exception.CarAlreadyInUseException;
 import com.mytaxi.exception.ConstraintsViolationException;
+import com.mytaxi.exception.DriverOfflineException;
 import com.mytaxi.exception.EntityNotFoundException;
-import java.util.List;
-import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import com.mytaxi.service.car.CarService;
+import com.mytaxi.service.drivercar.DriverCarRelService;
+import com.mytaxi.util.ExceptionMessages;
 
 /**
  * Service to encapsulate the link between DAO and controller and to have business logic for some driver specific things.
@@ -23,6 +38,12 @@ public class DefaultDriverService implements DriverService
     private static org.slf4j.Logger LOG = LoggerFactory.getLogger(DefaultDriverService.class);
 
     private final DriverRepository driverRepository;
+
+    @Autowired
+    private CarService carService;
+
+    @Autowired
+    private DriverCarRelService driverCarRelService;
 
 
     public DefaultDriverService(final DriverRepository driverRepository)
@@ -109,14 +130,115 @@ public class DefaultDriverService implements DriverService
     @Override
     public List<DriverDO> find(OnlineStatus onlineStatus)
     {
-        return driverRepository.findByOnlineStatus(onlineStatus);
+        return driverRepository.findByOnlineStatusAndDeleted(onlineStatus, false);
+    }
+
+
+    /* (non-Javadoc)
+     * @see com.mytaxi.service.driver.DriverService#selectCar(long, long)
+     */
+    @Override
+    public DriverDTO selectCar(long driverId, long carId) throws CarAlreadyInUseException, EntityNotFoundException, DriverOfflineException
+    {
+        //Check if CAR and Driver Entities Exist for the given driver and car IDs
+        DriverDO driverEntity = findDriverChecked(driverId);
+
+        CarDO carEntity = carService.find(carId);
+
+        try
+        {
+            if (OnlineStatus.ONLINE.equals(driverEntity.getOnlineStatus()))
+                linkDriverToCar(driverId, carId);
+            else
+                throw new DriverOfflineException("The Driver " + driverEntity.getUsername() + " is currently Offline. Please try after sometime ");
+        }
+        catch (DataIntegrityViolationException dataIntegrityException)
+        {
+            throw new CarAlreadyInUseException(ExceptionMessages.CAR_ALREAD_IN_USE.getMessage());
+        }
+
+        return DriverMapper.constructDriverWithCar(driverEntity, carEntity);
+
+    }
+
+
+    @Override
+    public void deselectCar(long driverId, long carId) throws DriverOfflineException, EntityNotFoundException
+    {
+
+        DriverDO driverEntity = findDriverChecked(driverId);
+
+        carService.find(carId);
+
+        try
+        {
+
+            //Assuming driver can De-link a car only if he is in Online
+            if (OnlineStatus.ONLINE.equals(driverEntity.getOnlineStatus()))
+                delinkDriverCar(driverId, carId);
+
+            else
+                throw new DriverOfflineException("The Driver " + driverEntity.getUsername() + " is currently Offline. Please try after sometime ");
+        }
+        catch (EntityNotFoundException ex)
+        {
+            throw new EntityNotFoundException(ExceptionMessages.DRIVER_NOT_ASSOC_CAR.getMessage());
+        }
+        catch (InvalidDataAccessApiUsageException exception)
+        {
+            throw new EntityNotFoundException(ExceptionMessages.DRIVER_NOT_ASSOC_CAR.getMessage());
+        }
+    }
+
+
+    private void delinkDriverCar(long driverId, long carId) throws EntityNotFoundException
+    {
+        DriverCarLinkDO driverCarEntity = driverCarRelService.getDriverCarEntity(driverId, carId);
+        driverCarRelService.delete(driverCarEntity);
+
+    }
+
+
+    @Override
+    public void updateOnlineStatus(long driverId, OnlineStatus status) throws EntityNotFoundException
+    {
+        DriverDO driverEntity = findDriverChecked(driverId);
+        driverEntity.setOnlineStatus(status);
+        driverRepository.save(driverEntity);
+    }
+
+
+    private void linkDriverToCar(long driverId, long carId)
+    {
+        DriverCarLinkDO linkDO = new DriverCarLinkDO();
+        linkDO.setCarId(carId);
+        linkDO.setDriverId(driverId);
+        driverCarRelService.save(linkDO);
     }
 
 
     private DriverDO findDriverChecked(Long driverId) throws EntityNotFoundException
     {
-        return driverRepository.findById(driverId)
-            .orElseThrow(() -> new EntityNotFoundException("Could not find entity with id: " + driverId));
+        return driverRepository
+            .findById(driverId)
+            .orElseThrow(() -> new EntityNotFoundException("Could not find Driver with id: " + driverId));
     }
 
+
+    @Override
+    public List<DriverDO> findDriverByCarParams(CarDTO carDTO) throws EntityNotFoundException
+    {
+        List<DriverDO> driverEntities;
+        try
+        {
+            driverEntities = driverCarRelService.getDriverByCarDetails(CarMapper.createCarDO(carDTO));
+
+        }
+        catch (EntityNotFoundException ex)
+        {
+            throw new EntityNotFoundException(ExceptionMessages.DRIVER_NOT_FOUND.getMessage());
+        }
+        return driverEntities;
+
+    }
 }
