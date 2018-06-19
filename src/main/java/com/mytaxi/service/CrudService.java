@@ -1,6 +1,5 @@
 package com.mytaxi.service;
 
-import com.mytaxi.datatransferobject.CarDTO;
 import com.mytaxi.exception.ConstraintsViolationException;
 import com.mytaxi.exception.EntityNotFoundException;
 
