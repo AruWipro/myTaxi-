@@ -1,50 +1,70 @@
 package com.mytaxi.datatransferobject;
 
+import javax.validation.constraints.NotNull;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mytaxi.domainvalue.GeoCoordinate;
-import javax.validation.constraints.NotNull;
+import com.mytaxi.domainvalue.OnlineStatus;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DriverDTO
 {
     @JsonIgnore
     private Long id;
-
+   
     @NotNull(message = "Username can not be null!")
     private String username;
 
     @NotNull(message = "Password can not be null!")
     private String password;
-
+    
     private GeoCoordinate coordinate;
 
+    private CarDTO carDTO;
 
-    private DriverDTO()
+    private OnlineStatus onlineStatus;
+
+
+    public DriverDTO()
+    {}
+
+    public void setCarDTO(CarDTO carDTO)
     {
+        this.carDTO = carDTO;
+    }
+    public CarDTO getCarDTO()
+    {
+        return carDTO;
+    }
+    
+    @JsonIgnore
+    public Long getId()
+    {
+        return id;
     }
 
 
-    private DriverDTO(Long id, String username, String password, GeoCoordinate coordinate)
+    public void setId(Long id)
     {
         this.id = id;
-        this.username = username;
-        this.password = password;
-        this.coordinate = coordinate;
+    }
+
+
+    public OnlineStatus getOnlineStatus()
+    {
+        return onlineStatus;
+    }
+    
+    public void setOnlineStatus(OnlineStatus onlineStatus)
+    {
+        this.onlineStatus = onlineStatus;
     }
 
 
     public static DriverDTOBuilder newBuilder()
     {
         return new DriverDTOBuilder();
-    }
-
-
-    @JsonProperty
-    public Long getId()
-    {
-        return id;
     }
 
 
@@ -65,12 +85,27 @@ public class DriverDTO
         return coordinate;
     }
 
+    public void setCoordinate(GeoCoordinate coordinate)
+    {
+        this.coordinate = coordinate;
+    }
+    
+    private DriverDTO(Long id, String username, String password, GeoCoordinate coordinate, OnlineStatus status)
+    {
+        this.id = id;
+        this.username = username;
+        this.password = password;
+        this.coordinate = coordinate;
+        this.onlineStatus = status;
+    }
+
     public static class DriverDTOBuilder
     {
         private Long id;
         private String username;
         private String password;
         private GeoCoordinate coordinate;
+        private OnlineStatus status;
 
 
         public DriverDTOBuilder setId(Long id)
@@ -101,10 +136,18 @@ public class DriverDTO
         }
 
 
+        public DriverDTOBuilder setOnlineStatus(OnlineStatus status)
+        {
+            this.status = status;
+            return this;
+        }
+
+
         public DriverDTO createDriverDTO()
         {
-            return new DriverDTO(id, username, password, coordinate);
+            return new DriverDTO(id, username, password, coordinate, status);
         }
 
     }
+
 }

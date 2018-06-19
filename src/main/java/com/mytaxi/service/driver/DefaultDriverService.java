@@ -14,7 +14,6 @@ import com.mytaxi.controller.mapper.DriverMapper;
 import com.mytaxi.dataaccessobject.DriverRepository;
 import com.mytaxi.datatransferobject.CarDTO;
 import com.mytaxi.datatransferobject.DriverDTO;
-import com.mytaxi.domainobject.CarDO;
 import com.mytaxi.domainobject.DriverCarLinkDO;
 import com.mytaxi.domainobject.DriverDO;
 import com.mytaxi.domainvalue.GeoCoordinate;
@@ -60,9 +59,10 @@ public class DefaultDriverService implements DriverService
      * @throws EntityNotFoundException if no driver with the given id was found.
      */
     @Override
-    public DriverDO find(Long driverId) throws EntityNotFoundException
+    public DriverDTO find(Long driverId) throws EntityNotFoundException
     {
-        return findDriverChecked(driverId);
+        DriverDO driverEntity= findDriverChecked(driverId);
+        return DriverMapper.makeDriverDTO(driverEntity);
     }
 
 
@@ -74,7 +74,8 @@ public class DefaultDriverService implements DriverService
      * @throws ConstraintsViolationException if a driver already exists with the given username, ... .
      */
     @Override
-    public DriverDO create(DriverDO driverDO) throws ConstraintsViolationException
+    @Transactional
+    public DriverDTO create(DriverDO driverDO) throws ConstraintsViolationException
     {
         DriverDO driver;
         try
@@ -86,7 +87,7 @@ public class DefaultDriverService implements DriverService
             LOG.warn("Some constraints are thrown due to driver creation", e);
             throw new ConstraintsViolationException(e.getMessage());
         }
-        return driver;
+        return DriverMapper.makeDriverDTO(driver);
     }
 
 
@@ -128,9 +129,10 @@ public class DefaultDriverService implements DriverService
      * @param onlineStatus
      */
     @Override
-    public List<DriverDO> find(OnlineStatus onlineStatus)
+    public List<DriverDTO> find(OnlineStatus onlineStatus)
     {
-        return driverRepository.findByOnlineStatusAndDeleted(onlineStatus, false);
+         List<DriverDO> driversList=driverRepository.findByOnlineStatusAndDeleted(onlineStatus, false);
+         return DriverMapper.makeDriverDTOList(driversList);
     }
 
 
@@ -143,7 +145,7 @@ public class DefaultDriverService implements DriverService
         //Check if CAR and Driver Entities Exist for the given driver and car IDs
         DriverDO driverEntity = findDriverChecked(driverId);
 
-        CarDO carEntity = carService.find(carId);
+        CarDTO carDTO = carService.find(carId);
 
         try
         {
@@ -157,7 +159,7 @@ public class DefaultDriverService implements DriverService
             throw new CarAlreadyInUseException(ExceptionMessages.CAR_ALREAD_IN_USE.getMessage());
         }
 
-        return DriverMapper.constructDriverWithCar(driverEntity, carEntity);
+        return DriverMapper.constructDriverWithCar(driverEntity, carDTO);
 
     }
 
@@ -193,6 +195,7 @@ public class DefaultDriverService implements DriverService
 
     private void delinkDriverCar(long driverId, long carId) throws EntityNotFoundException
     {
+        //Check if an Entity of that Combination Exists and delete that Entity
         DriverCarLinkDO driverCarEntity = driverCarRelService.getDriverCarEntity(driverId, carId);
         driverCarRelService.delete(driverCarEntity);
 
@@ -200,6 +203,7 @@ public class DefaultDriverService implements DriverService
 
 
     @Override
+    @Transactional
     public void updateOnlineStatus(long driverId, OnlineStatus status) throws EntityNotFoundException
     {
         DriverDO driverEntity = findDriverChecked(driverId);
@@ -207,7 +211,7 @@ public class DefaultDriverService implements DriverService
         driverRepository.save(driverEntity);
     }
 
-
+    @Transactional
     private void linkDriverToCar(long driverId, long carId)
     {
         DriverCarLinkDO linkDO = new DriverCarLinkDO();
@@ -225,8 +229,11 @@ public class DefaultDriverService implements DriverService
     }
 
 
+    /* (non-Javadoc)
+     * @see com.mytaxi.service.driver.DriverService#findDriverByCarParams(com.mytaxi.datatransferobject.CarDTO)
+     */
     @Override
-    public List<DriverDO> findDriverByCarParams(CarDTO carDTO) throws EntityNotFoundException
+    public List<DriverDTO> findDriverByCarParams(CarDTO carDTO) throws EntityNotFoundException
     {
         List<DriverDO> driverEntities;
         try
@@ -238,7 +245,7 @@ public class DefaultDriverService implements DriverService
         {
             throw new EntityNotFoundException(ExceptionMessages.DRIVER_NOT_FOUND.getMessage());
         }
-        return driverEntities;
+        return DriverMapper.makeDriverDTOList(driverEntities);
 
     }
 }
