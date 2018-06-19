@@ -102,7 +102,7 @@ public class DefaultDriverService implements DriverService
     public void delete(Long driverId) throws EntityNotFoundException
     {
         DriverDO driverDO = findDriverChecked(driverId);
-        driverDO.setDeleted(true);
+        driverDO.setIsDriverDeleted(true);
     }
 
 
@@ -148,8 +148,8 @@ public class DefaultDriverService implements DriverService
         CarDTO carDTO = carService.find(carId);
 
         try
-        {   //Driver should be online and Car Should not be in deleted State
-            if (OnlineStatus.ONLINE.equals(driverEntity.getOnlineStatus()) && !carDTO.isDeleted() )
+        {   //Driver should not be in deleted state and should be online and Car Should not be in deleted State
+            if (!driverEntity.getIsDriverDeleted() && OnlineStatus.ONLINE.equals(driverEntity.getOnlineStatus()) && !carDTO.isDeleted() )
                 linkDriverToCar(driverId, carId);
             else if(OnlineStatus.OFFLINE.equals(driverEntity.getOnlineStatus()))
                 throw new DriverOfflineException("The Driver " + driverEntity.getUsername() + " is currently Offline. Please try after sometime ");

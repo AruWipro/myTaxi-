@@ -32,6 +32,8 @@ public class CarDTO
     private CarType carType;
 
     private String manufacturer;
+    @JsonIgnore
+    private boolean isDeleted;
 
  
  

@@ -12,7 +12,8 @@ public enum ExceptionMessages
     DRIVER_NOT_ASSOC_CAR("Sorry we cannot deselect the car as the driver is currently not assosciated with this car"),
     CAR_ALREADY_EXISTS("Sorry a car alread exists with the same license plate"),
     CAR_NOT_FOUND("Sorry car with given request attributes not found"),
-    DRIVER_NOT_FOUND("Sorry driver with given request attributes not found");
+    DRIVER_NOT_FOUND("Sorry driver with given request attributes not found"),
+    CAR_NOT_AVAILABLE("Sorry this car is not available currently");
     
     
     private String message;

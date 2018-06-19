@@ -42,7 +42,7 @@ public class DriverDO
     @NotNull(message = "Password can not be null!")
     private String password;
 
-    @Column(nullable = false)
+    @Column(nullable = false,name="deleted")
     private Boolean deleted = false;
 
     @Embedded
@@ -65,8 +65,8 @@ public class DriverDO
     {
         this.username = username;
         this.password = password;
-        this.deleted = false;
-        this.coordinate = coordinate;
+        this.deleted=false;
+        this.coordinate = null;
         this.dateCoordinateUpdated = null;
         this.onlineStatus = status;
     }
@@ -96,18 +96,6 @@ public class DriverDO
     }
 
 
-    public Boolean getDeleted()
-    {
-        return deleted;
-    }
-
-
-    public void setDeleted(Boolean deleted)
-    {
-        this.deleted = deleted;
-    }
-
-
     public OnlineStatus getOnlineStatus()
     {
         return onlineStatus;
@@ -130,6 +118,18 @@ public class DriverDO
     {
         this.coordinate = coordinate;
         this.dateCoordinateUpdated = ZonedDateTime.now();
+    }
+
+
+    public Boolean getIsDriverDeleted()
+    {
+        return deleted;
+    }
+
+
+    public void setIsDriverDeleted(Boolean isDriverDeleted)
+    {
+        this.deleted = isDriverDeleted;
     }
 
 }

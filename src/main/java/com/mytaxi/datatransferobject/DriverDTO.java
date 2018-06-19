@@ -24,7 +24,9 @@ public class DriverDTO
     private CarDTO carDTO;
 
     private OnlineStatus onlineStatus;
-
+    
+    @JsonIgnore
+    private boolean isDriverDeleted;
 
     public DriverDTO()
     {}
@@ -90,13 +92,24 @@ public class DriverDTO
         this.coordinate = coordinate;
     }
     
-    private DriverDTO(Long id, String username, String password, GeoCoordinate coordinate, OnlineStatus status)
+    private DriverDTO(Long id, String username, String password, GeoCoordinate coordinate, OnlineStatus status,boolean isDriverDeleted)
     {
         this.id = id;
         this.username = username;
         this.password = password;
         this.coordinate = coordinate;
         this.onlineStatus = status;
+        this.isDriverDeleted=isDriverDeleted;
+    }
+    @JsonIgnore
+    public boolean isDriverDeleted()
+    {
+        return isDriverDeleted;
+    }
+
+    public void setDriverDeleted(boolean isDriverDeleted)
+    {
+        this.isDriverDeleted = isDriverDeleted;
     }
 
     public static class DriverDTOBuilder
@@ -106,6 +119,8 @@ public class DriverDTO
         private String password;
         private GeoCoordinate coordinate;
         private OnlineStatus status;
+        private boolean isDriverDeleted;
+        
 
 
         public DriverDTOBuilder setId(Long id)
@@ -141,11 +156,16 @@ public class DriverDTO
             this.status = status;
             return this;
         }
+        
+        public DriverDTOBuilder setisDriverDeleted(boolean isDriverDeleted) {
+            this.isDriverDeleted=isDriverDeleted;
+            return this;
+        }
 
 
         public DriverDTO createDriverDTO()
         {
-            return new DriverDTO(id, username, password, coordinate, status);
+            return new DriverDTO(id, username, password, coordinate, status,isDriverDeleted);
         }
 
     }

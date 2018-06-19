@@ -158,7 +158,7 @@ public class DriverController
      * @throws EntityNotFoundException the entity not found exception
      */
     @GetMapping
-    public List<DriverDTO> findDrivers(@RequestParam OnlineStatus onlineStatus)
+    public List<DriverDTO> findDriversByStatus(@RequestParam OnlineStatus onlineStatus)
         throws ConstraintsViolationException, EntityNotFoundException
     {
         return driverService.findByStatus(onlineStatus);

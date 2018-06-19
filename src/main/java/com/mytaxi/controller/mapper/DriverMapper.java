@@ -26,14 +26,14 @@ public class DriverMapper
                 .setId(driverDO.getId())
                 .setPassword(driverDO.getPassword())
                 .setUsername(driverDO.getUsername())
-                .setOnlineStatus(driverDO.getOnlineStatus());
+                .setOnlineStatus(driverDO.getOnlineStatus())
+                .setisDriverDeleted(driverDO.getIsDriverDeleted());
 
         GeoCoordinate coordinate = driverDO.getCoordinate();
         if (coordinate != null && coordinate.getPoint() != null)
         {
             driverDTOBuilder.setCoordinate(coordinate);
         }
-
         return driverDTOBuilder.createDriverDTO();
     }
 
