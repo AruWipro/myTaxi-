@@ -148,11 +148,13 @@ public class DefaultDriverService implements DriverService
         CarDTO carDTO = carService.find(carId);
 
         try
-        {
-            if (OnlineStatus.ONLINE.equals(driverEntity.getOnlineStatus()))
+        {   //Driver should be online and Car Should not be in deleted State
+            if (OnlineStatus.ONLINE.equals(driverEntity.getOnlineStatus()) && !carDTO.isDeleted() )
                 linkDriverToCar(driverId, carId);
-            else
+            else if(OnlineStatus.OFFLINE.equals(driverEntity.getOnlineStatus()))
                 throw new DriverOfflineException("The Driver " + driverEntity.getUsername() + " is currently Offline. Please try after sometime ");
+            else
+                throw new CarAlreadyInUseException(ExceptionMessages.CAR_NOT_AVAILABLE.getMessage());
         }
         catch (DataIntegrityViolationException dataIntegrityException)
         {
