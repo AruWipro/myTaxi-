@@ -15,7 +15,8 @@ public class CarMapper
                                                           .seatCount(carDO.getSeatCount())
                                                           .rating(carDO.getRating())
                                                           .licensePlate(carDO.getLicensePlate())
-                                                          .manufacturer(carDO.getManufacturer());
+                                                          .manufacturer(carDO.getManufacturer())
+                                                          .isDeleted(carDO.isDeleted());
            
 
         return carBuilder.build();
