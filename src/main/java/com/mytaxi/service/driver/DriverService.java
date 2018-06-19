@@ -33,7 +33,7 @@ public interface DriverService extends CrudService<DriverDTO,DriverDO>
      * @param onlineStatus the online status
      * @return the list
      */
-    List<DriverDTO> find(OnlineStatus onlineStatus);
+    List<DriverDTO> findByStatus(OnlineStatus onlineStatus) throws EntityNotFoundException;
     
     /**
      * Select a car by Driver.

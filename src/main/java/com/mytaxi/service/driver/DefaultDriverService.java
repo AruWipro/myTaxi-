@@ -129,7 +129,7 @@ public class DefaultDriverService implements DriverService
      * @param onlineStatus
      */
     @Override
-    public List<DriverDTO> find(OnlineStatus onlineStatus)
+    public List<DriverDTO> findByStatus(OnlineStatus onlineStatus) throws EntityNotFoundException
     {
          List<DriverDO> driversList=driverRepository.findByOnlineStatusAndDeleted(onlineStatus, false);
          return DriverMapper.makeDriverDTOList(driversList);
