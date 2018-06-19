@@ -75,12 +75,12 @@ public class DefaultDriverService implements DriverService
      */
     @Override
     @Transactional
-    public DriverDTO create(DriverDO driverDO) throws ConstraintsViolationException
+    public DriverDTO create(DriverDTO driverDTO) throws ConstraintsViolationException
     {
         DriverDO driver;
         try
         {
-            driver = driverRepository.save(driverDO);
+            driver = driverRepository.save(DriverMapper.makeDriverDO(driverDTO));
         }
         catch (DataIntegrityViolationException e)
         {

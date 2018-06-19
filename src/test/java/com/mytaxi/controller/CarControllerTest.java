@@ -15,15 +15,11 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -34,17 +30,14 @@ import com.mytaxi.AbstractMockTestHelper;
 import com.mytaxi.datatransferobject.CarDTO;
 import com.mytaxi.service.car.CarService;
 
-@RunWith(SpringRunner.class)
-@WebMvcTest(value = CarController.class, secure = false)
 public class CarControllerTest extends AbstractMockTestHelper
 {
 
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    @Autowired
     private MockMvc mvc;
 
-    @MockBean
+    @Mock
     private CarService carService;
 
     @InjectMocks
@@ -72,8 +65,9 @@ public class CarControllerTest extends AbstractMockTestHelper
         doReturn(carDTO).when(carService).find(any(Long.class));
         carController.getCar(1L);
         MvcResult result =
-            mvc.perform(get("/v1/cars/{carId}", 1))
-               .andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
+            mvc
+                .perform(get("/v1/cars/{carId}", 1))
+                .andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
         final String responseBody = result.getResponse().getContentAsString();
         Assert.assertTrue(responseBody.contains("BDC-SDD-123"));
     }
@@ -109,21 +103,21 @@ public class CarControllerTest extends AbstractMockTestHelper
                         .content(jsonInString))
                 .andExpect(MockMvcResultMatchers.status().isCreated()).andReturn();
         final String responseBody = result.getResponse().getContentAsString();
-        Assert.assertTrue(responseBody.contains("11.0"));
+        Assert.assertTrue(responseBody.contains("Hundai"));
     }
 
 
     @Test
     public void updateCar() throws Exception
     {
-        CarData carData = getMockedCarData();
-        String jsonInString = mapper.writeValueAsString(carData);
-        doNothing().when(carFacade).update(any(CarData.class));
-        carController.updateCar(carData);
+        CarDTO carDTO = getMockedCarData();
+        String jsonInString = mapper.writeValueAsString(carDTO);
+        doNothing().when(carService).updateCar(any(CarDTO.class), any(Long.class));
+        carController.updateCar(carDTO, 1L);
         MvcResult result =
             mvc
                 .perform(
-                    put("/v1/cars")
+                    put("/v1/cars/{carId}",1)
                         .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
                         .content(jsonInString))
                 .andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
@@ -134,7 +128,7 @@ public class CarControllerTest extends AbstractMockTestHelper
     @Test
     public void deleteCar() throws Exception
     {
-        doNothing().when(carFacade).delete(any(Long.class));
+        doNothing().when(carService).delete(any(Long.class));
         carController.deleteCar(1L);
         MvcResult result =
             mvc

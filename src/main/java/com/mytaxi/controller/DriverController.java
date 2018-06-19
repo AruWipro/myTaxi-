@@ -113,8 +113,7 @@ public class DriverController
     @ResponseStatus(HttpStatus.CREATED)
     public DriverDTO createDriver(@Valid @RequestBody DriverDTO driverDTO) throws ConstraintsViolationException
     {
-        DriverDO driverDO = DriverMapper.makeDriverDO(driverDTO);
-        return driverService.create(driverDO);
+        return driverService.create(driverDTO);
     }
 
 

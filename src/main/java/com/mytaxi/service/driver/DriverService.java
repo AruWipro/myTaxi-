@@ -14,7 +14,7 @@ import com.mytaxi.service.CrudService;
 /**
  * The Interface DriverService.
  */
-public interface DriverService extends CrudService<DriverDTO,DriverDO>
+public interface DriverService extends CrudService<DriverDTO>
 {
     
     /**

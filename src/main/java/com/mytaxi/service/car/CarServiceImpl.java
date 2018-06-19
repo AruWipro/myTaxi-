@@ -32,7 +32,7 @@ public class CarServiceImpl implements CarService
     public CarDTO find(Long carId) throws EntityNotFoundException
     {
         CarDO carEntity = getCarEntityById(carId);
-        
+
         return CarMapper.getCarDTO(carEntity);
     }
 
@@ -49,19 +49,19 @@ public class CarServiceImpl implements CarService
 
 
     @Override
-    public CarDTO create(CarDO carDO) throws ConstraintsViolationException
+    public CarDTO create(CarDTO carDTO) throws ConstraintsViolationException
     {
-        CarDO car;
+        CarDO carDO;
         try
         {
-            car = carRepository.save(carDO);
+            carDO = carRepository.save(CarMapper.createCarDO(carDTO));
         }
         catch (DataIntegrityViolationException e)
         {
             LOG.warn("Some constraints are thrown due to car creation", e);
-            throw new ConstraintsViolationException(ExceptionMessages.CAR_ALREADY_EXISTS.getMessage());            
+            throw new ConstraintsViolationException(ExceptionMessages.CAR_ALREADY_EXISTS.getMessage());
         }
-        return CarMapper.getCarDTO(car);
+        return CarMapper.getCarDTO(carDO);
     }
 
 
@@ -76,15 +76,29 @@ public class CarServiceImpl implements CarService
         //Persisting the Entity
         carRepository.save(car);
     }
-    
+
 
     private CarDO getCarEntityById(Long carId) throws EntityNotFoundException
     {
         return this.carRepository
-                             .findById(carId)
-                             .orElseThrow(() -> new EntityNotFoundException("Could not find a Car with id: " + carId));
+            .findById(carId)
+            .orElseThrow(() -> new EntityNotFoundException("Could not find a Car with id: " + carId));
     }
 
 
+    @Override
+    @Transactional
+    public void updateCar(CarDTO carDTO,long carId) throws EntityNotFoundException
+    {
+        CarDO carDO = getCarEntityById(carId);
+        carDO.setCarType(carDTO.getCarType());
+        carDO.setLicensePlate(carDTO.getLicensePlate());
+        carDO.setManufacturer(carDTO.getManufacturer());
+        carDO.setRating(carDTO.getRating());
+        carDO.setSeatCount(carDTO.getSeatCount());
+        carDO.setDeleted(carDTO.isDeleted());
+
+        carRepository.save(carDO);
+    }
 
 }

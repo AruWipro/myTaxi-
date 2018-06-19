@@ -10,14 +10,13 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.mytaxi.controller.mapper.CarMapper;
 import com.mytaxi.datatransferobject.CarDTO;
-import com.mytaxi.domainobject.CarDO;
 import com.mytaxi.exception.ConstraintsViolationException;
 import com.mytaxi.exception.EntityNotFoundException;
 import com.mytaxi.service.car.CarService;
@@ -69,8 +68,7 @@ public class CarController
     @ResponseStatus(HttpStatus.CREATED)
     public CarDTO createCar(@Valid @RequestBody CarDTO carDTO) throws ConstraintsViolationException
     {
-        CarDO carDO = CarMapper.createCarDO(carDTO);
-        return carServiceImpl.create(carDO);
+        return carServiceImpl.create(carDTO);
     }
 
 
@@ -86,4 +84,8 @@ public class CarController
         carServiceImpl.delete(carId);
     }
 
+    @PutMapping("/{carId}")
+    public void updateCar(@Valid @RequestBody CarDTO carDTO,@PathVariable long carId) throws EntityNotFoundException {
+        carServiceImpl.updateCar(carDTO,carId);
+    }
 }

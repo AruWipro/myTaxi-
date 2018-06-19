@@ -1,10 +1,10 @@
 package com.mytaxi.dataaccessobject;
 
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.mytaxi.domainobject.CarDO;
 
-public interface CarRepository extends CrudRepository<CarDO,Long>
+public interface CarRepository extends JpaRepository<CarDO,Long>
 {
 
 }
