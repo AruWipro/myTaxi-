@@ -4,7 +4,6 @@ import java.util.List;
 
 import javax.validation.Valid;
 
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -29,7 +28,6 @@ import com.mytaxi.exception.DriverOfflineException;
 import com.mytaxi.exception.EntityNotFoundException;
 import com.mytaxi.service.driver.DriverService;
 
-// TODO: Auto-generated Javadoc
 /**
  * All operations with a driver will be routed by this controller.
  * <p/>
@@ -41,7 +39,6 @@ public class DriverController
 
     /** The driver service. */
     private final DriverService driverService;
-    private static org.slf4j.Logger LOG = LoggerFactory.getLogger(DriverController.class);
 
 
     /**
@@ -164,7 +161,7 @@ public class DriverController
     public List<DriverDTO> findDrivers(@RequestParam OnlineStatus onlineStatus)
         throws ConstraintsViolationException, EntityNotFoundException
     {
-        return DriverMapper.makeDriverDTOList(driverService.find(onlineStatus));
+        return driverService.findByStatus(onlineStatus);
     }
 
 
@@ -196,9 +193,8 @@ public class DriverController
         @RequestParam(required = false) String licensePlate, @RequestParam(required = false) Long seatCount, @RequestParam(required = false) Integer rating)
         throws EntityNotFoundException
     {
-        CarDTO car = CarDTO.builder().licensePlate(licensePlate).seatCount(seatCount).rating(rating).build();
-        List<DriverDO> driverEntitites = driverService.findDriverByCarParams(car);
-        return DriverMapper.makeDriverDTOList(driverEntitites);
+        CarDTO carDTO = CarDTO.builder().licensePlate(licensePlate).seatCount(seatCount).rating(rating).build();
+        return driverService.findDriverByCarParams(carDTO);
 
     }
 

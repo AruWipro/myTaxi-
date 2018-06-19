@@ -54,7 +54,7 @@ public class CarController
     @GetMapping("/")
     public List<CarDTO> getAllCars()
     {
-        return CarMapper.getCarDTOList(carServiceImpl.getAllCars());
+        return carServiceImpl.getAllCars();
     }
 
 
@@ -70,7 +70,7 @@ public class CarController
     public CarDTO createCar(@Valid @RequestBody CarDTO carDTO) throws ConstraintsViolationException
     {
         CarDO carDO = CarMapper.createCarDO(carDTO);
-        return CarMapper.getCarDTO(carServiceImpl.create(carDO));
+        return carServiceImpl.create(carDO);
     }
 
 
